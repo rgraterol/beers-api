@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/rgraterol/beers-api/initializers/config"
+	config2 "github.com/rgraterol/beers-api/cmd/api/initializers/config"
 )
 
 // LoggerConfiguration represents configuration for logs.
@@ -56,7 +56,7 @@ func getEncoder() zapcore.Encoder {
 }
 
 func getLevel() zapcore.Level {
-	err := config.LoadConfigSection("logger", &loggerConfig)
+	err := config2.LoadConfigSection("logger", &loggerConfig)
 	if err != nil {
 		panic(err)
 	}

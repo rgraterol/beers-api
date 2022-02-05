@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/rgraterol/beers-api/initializers/config"
-	"github.com/rgraterol/beers-api/initializers/logger"
-	"github.com/rgraterol/beers-api/initializers/server"
+	config2 "github.com/rgraterol/beers-api/cmd/api/initializers/config"
+	logger2 "github.com/rgraterol/beers-api/cmd/api/initializers/logger"
+	server2 "github.com/rgraterol/beers-api/cmd/api/initializers/server"
 )
 
 func main() {
@@ -11,7 +11,7 @@ func main() {
 }
 
 func initializers () {
-	config.ConfigInitializer()
-	logger.LoggerInitializer()
-	server.ServerInitializer()
+	config2.ConfigInitializer()
+	logger2.LoggerInitializer()
+	server2.ServerInitializer()
 }

@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/rgraterol/beers-api/initializers/config"
-	"github.com/rgraterol/beers-api/initializers/logger"
+	config2 "github.com/rgraterol/beers-api/cmd/api/initializers/config"
+	logger2 "github.com/rgraterol/beers-api/cmd/api/initializers/logger"
 )
 
 var serverConfig ServerConfiguration
@@ -30,7 +30,7 @@ func basePingHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func ServerInitializer() {
-	err := config.LoadConfigSection("server", &serverConfig)
+	err := config2.LoadConfigSection("server", &serverConfig)
 	if err != nil {
 		panic(errors.New("failed to read the server config"))
 	}
@@ -40,10 +40,10 @@ func ServerInitializer() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(time.Duration(serverConfig.Timeout) * time.Second))
-	r.Use(logger.ChiLogger())
+	r.Use(logger2.ChiLogger())
 
 	r.Get("/ping", basePingHandler)
 
-	zap.S().Info("Application running on address ", serverConfig.Address, " and enviroment ", config.Env())
+	zap.S().Info("Application running on address ", serverConfig.Address, " and enviroment ", config2.Env())
 	http.ListenAndServe(serverConfig.Address, r)
 }
