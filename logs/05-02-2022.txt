@@ -1,1 +1,0 @@
-05-02-2022T17:01:14Z	[34mINFO[0m	server/server.go:47	Application running on address :8080 and enviroment development
