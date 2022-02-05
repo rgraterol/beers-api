@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/rgraterol/beers-api/cmd/api/initializers"
+	i "github.com/rgraterol/beers-api/cmd/api/initializers"
 )
 
 func main() {
@@ -9,7 +9,8 @@ func main() {
 }
 
 func run() {
-	initializers.ConfigInitializer()
-	initializers.LoggerInitializer()
-	initializers.ServerInitializer()
+	i.ConfigInitializer()
+	i.LoggerInitializer()
+	i.DatabaseInitializer()
+	i.ServerInitializer()
 }

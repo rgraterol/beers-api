@@ -31,8 +31,8 @@ var levelMap = map[string]zapcore.Level{
 }
 
 func createDirectoryIfDoesntExist() {
-	path, _ := crrFSGetter.getwd()
-	if _, err := os.Stat(path + "/logs"); os.IsNotExist(err) {
+	crrPath, _ := crrFSGetter.getwd()
+	if _, err := os.Stat(crrPath + "/logs"); os.IsNotExist(err) {
 		os.Mkdir("logs", os.ModePerm)
 	}
 }
