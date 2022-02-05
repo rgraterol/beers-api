@@ -13,18 +13,15 @@ import (
 	"github.com/rgraterol/beers-api/initializers/logger"
 )
 
-
 var serverConfig ServerConfiguration
 
 // ServerConfiguration represents a server configuration.
 type ServerConfiguration struct {
 	// Address is where the Server will listen
 	Address string `yaml:"address"`
-	// Debug flag if we should enable debugging features.
+	// Timeout for all requests.
 	Timeout int `yaml:"timeout"`
 }
-
-
 
 func basePingHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -32,7 +29,7 @@ func basePingHandler(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode("pong")
 }
 
-func serverInitializer() {
+func ServerInitializer() {
 	err := config.LoadConfigSection("server", &serverConfig)
 	if err != nil {
 		panic(errors.New("failed to read the server config"))
@@ -49,10 +46,4 @@ func serverInitializer() {
 
 	zap.S().Info("Application running on address ", serverConfig.Address, " and enviroment ", config.Env())
 	http.ListenAndServe(serverConfig.Address, r)
-}
-
-func RunServer() {
-	config.ConfigInitializer()
-	logger.LoggerInitializer()
-	serverInitializer()
 }

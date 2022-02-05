@@ -22,7 +22,6 @@ func loadConfigFromReader(reader io.Reader, ptr interface{}) error {
 	return nil
 }
 
-
 func loadConfigFromFile(filePath string, ptr interface{}) error {
 	file, err := os.Open(filePath)
 	if err != nil {
