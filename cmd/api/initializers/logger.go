@@ -1,4 +1,4 @@
-package logger
+package initializers
 
 import (
 	"go.uber.org/zap"
@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	config2 "github.com/rgraterol/beers-api/cmd/api/initializers/config"
 )
 
 // LoggerConfiguration represents configuration for logs.
@@ -29,6 +28,13 @@ var levelMap = map[string]zapcore.Level{
 	"dpanic": zapcore.DPanicLevel,
 	"panic":  zapcore.PanicLevel,
 	"fatal":  zapcore.FatalLevel,
+}
+
+func createDirectoryIfDoesntExist() {
+	path, _ := crrFSGetter.getwd()
+	if _, err := os.Stat(path + "/logs"); os.IsNotExist(err) {
+		os.Mkdir("logs", os.ModePerm)
+	}
 }
 
 func getLogWriter() zapcore.WriteSyncer {
@@ -56,7 +62,7 @@ func getEncoder() zapcore.Encoder {
 }
 
 func getLevel() zapcore.Level {
-	err := config2.LoadConfigSection("logger", &loggerConfig)
+	err := LoadConfigSection("logger", &loggerConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -79,6 +85,7 @@ func ChiLogger() func(next http.Handler) http.Handler {
 }
 
 func LoggerInitializer() {
+	createDirectoryIfDoesntExist()
 	writerSync := getLogWriter()
 	encoder := getEncoder()
 

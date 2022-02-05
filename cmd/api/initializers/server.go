@@ -1,7 +1,6 @@
-package server
+package initializers
 
 import (
-	"encoding/json"
 	"errors"
 	"go.uber.org/zap"
 	"net/http"
@@ -9,8 +8,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	config2 "github.com/rgraterol/beers-api/cmd/api/initializers/config"
-	logger2 "github.com/rgraterol/beers-api/cmd/api/initializers/logger"
 )
 
 var serverConfig ServerConfiguration
@@ -23,14 +20,8 @@ type ServerConfiguration struct {
 	Timeout int `yaml:"timeout"`
 }
 
-func basePingHandler(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode("pong")
-}
-
 func ServerInitializer() {
-	err := config2.LoadConfigSection("server", &serverConfig)
+	err := LoadConfigSection("server", &serverConfig)
 	if err != nil {
 		panic(errors.New("failed to read the server config"))
 	}
@@ -40,10 +31,10 @@ func ServerInitializer() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(time.Duration(serverConfig.Timeout) * time.Second))
-	r.Use(logger2.ChiLogger())
+	r.Use(ChiLogger())
 
-	r.Get("/ping", basePingHandler)
+	routes(r)
 
-	zap.S().Info("Application running on address ", serverConfig.Address, " and enviroment ", config2.Env())
+	zap.S().Info("Application running on address ", serverConfig.Address, " and enviroment ", Env())
 	http.ListenAndServe(serverConfig.Address, r)
 }
