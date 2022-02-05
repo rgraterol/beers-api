@@ -5,25 +5,26 @@ import (
 	"errors"
 	"go.uber.org/zap"
 	"net/http"
-	"net/http/pprof"
+	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rgraterol/beers-api/initializers/config"
 	"github.com/rgraterol/beers-api/initializers/logger"
 )
 
-var handler http.Handler
 
-var Server *http.ServeMux
-
-var ServerConfig ServerConfiguration
+var serverConfig ServerConfiguration
 
 // ServerConfiguration represents a server configuration.
 type ServerConfiguration struct {
 	// Address is where the Server will listen
 	Address string `yaml:"address"`
 	// Debug flag if we should enable debugging features.
-	Debug bool `yaml:"debug"`
+	Timeout int `yaml:"timeout"`
 }
+
+
 
 func basePingHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -32,29 +33,26 @@ func basePingHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func serverInitializer() {
-	err := config.LoadConfigSection("server", &ServerConfig)
+	err := config.LoadConfigSection("server", &serverConfig)
 	if err != nil {
 		panic(errors.New("failed to read the server config"))
 	}
 
-	Server = http.NewServeMux()
-	Server.HandleFunc("/ping", basePingHandler)
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(time.Duration(serverConfig.Timeout) * time.Second))
+	r.Use(logger.ChiLogger())
 
-	if ServerConfig.Debug {
-		Server.HandleFunc("/debug/pprof/", pprof.Index)
-		Server.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		Server.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		Server.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		Server.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	}
-	handler = Server
+	r.Get("/ping", basePingHandler)
+
+	zap.S().Info("Application running on address ", serverConfig.Address, " and enviroment ", config.Env())
+	http.ListenAndServe(serverConfig.Address, r)
 }
 
-func RunServer() error {
+func RunServer() {
 	config.ConfigInitializer()
 	logger.LoggerInitializer()
 	serverInitializer()
-
-	zap.S().Info("Application running on address ", ServerConfig.Address, " and enviroment ", config.Env())
-	return http.ListenAndServe(ServerConfig.Address, handler)
 }

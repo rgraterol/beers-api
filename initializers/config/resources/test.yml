@@ -1,6 +1,6 @@
 server:
   address: ":8080"
-  debug: true
+  timeout: 50
 
 logger:
   level: "debug"
