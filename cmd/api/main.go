@@ -13,4 +13,5 @@ func run() {
 	i.LoggerInitializer()
 	i.DatabaseInitializer()
 	i.ServerInitializer()
+	i.RestClientsInitializer()
 }

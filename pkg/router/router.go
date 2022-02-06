@@ -16,6 +16,7 @@ func Routes(r *chi.Mux) {
 		r.Get("/", beers.List(&b))
 		r.Post("/", beers.Create(&b))
 		r.Get("/{beerID}", beers.Get(&b))
+		r.Get("/{beerID}/boxprice", beers.BoxPrice(&b))
 	})
 }
 

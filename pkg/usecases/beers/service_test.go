@@ -11,6 +11,7 @@ import (
 	"github.com/rgraterol/beers-api/cmd/api/initializers"
 	"github.com/rgraterol/beers-api/pkg/db"
 	"github.com/rgraterol/beers-api/pkg/usecases/beers"
+	"github.com/rgraterol/beers-api/pkg/usecases/currencylayer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -118,6 +119,75 @@ func TestGetOK(t *testing.T) {
 	assert.Equal(t, b.ID, fetchedB.ID)
 }
 
+func TestBoxPriceNotFoundError(t *testing.T) {
+	// Given
+	clearTestDB()
+	var s beers.Service
+	// When
+	b, err := s.BoxPrice(1, &beers.BeerBoxParameters{})
+	// Then
+	assert.NotNil(t, err)
+	assert.Nil(t,b)
+}
+
+func TestBoxPriceClientLayerError(t *testing.T) {
+	// Given
+	clearTestDB()
+	var s beers.Service
+	b := specificPriceBeerMock()
+	_, err := s.Create(&b)
+	assert.Nil(t, err)
+	currencylayer.Layer = &mockLayerError{}
+	// When
+	p, err := s.BoxPrice(2, &beers.BeerBoxParameters{
+		Currency: "NYC",
+	})
+	// Then
+	assert.NotNil(t, err)
+	assert.Nil(t,p)
+	assert.Contains(t, err.Error(), "cannot access currencyLayer API")
+}
+
+func TestBoxPriceInvalidCurrencyError(t *testing.T) {
+	// Given
+	clearTestDB()
+	var s beers.Service
+	b := specificPriceBeerMock()
+	_, err := s.Create(&b)
+	assert.Nil(t, err)
+	currencylayer.Layer = &mockLayerOk{}
+	// When
+	p, err := s.BoxPrice(2, &beers.BeerBoxParameters{
+		Currency: "NYC",
+	})
+	// Then
+	assert.NotNil(t, err)
+	assert.Nil(t,p)
+	assert.Contains(t, err.Error(), "invalid target currency")
+}
+
+func TestBoxPriceOkConversion(t *testing.T) {
+	// Given
+	clearTestDB()
+	var s beers.Service
+	b := specificPriceBeerMock()
+	_, err := s.Create(&b)
+	assert.Nil(t, err)
+	currencylayer.Layer = &mockLayerOk{}
+	// When
+	p, err := s.BoxPrice(2, &beers.BeerBoxParameters{
+		Quantity: 12,
+		Currency: "ARS",
+	})
+	// Then
+	assert.Nil(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, float64(2288.9676977167974), p.Price)
+	assert.Equal(t, b.ID, p.Beer.ID)
+	assert.Equal(t, "ARS", p.Target.Currency)
+}
+
+
 func beerMock() beers.Beer {
 	return beers.Beer{
 		ID:        1,
@@ -126,6 +196,17 @@ func beerMock() beers.Beer {
 		Country:   "ChileMock",
 		Price:     2.5,
 		Currency:  "MCK",
+	}
+}
+
+func specificPriceBeerMock() beers.Beer {
+	return beers.Beer{
+		ID:        2,
+		Name:      "Calafate",
+		Brewery:   "Austral",
+		Country:   "ChileMock",
+		Price:     1500,
+		Currency:  "CLP",
 	}
 }
 
@@ -151,4 +232,24 @@ func initTestDB() {
 
 func clearTestDB() {
 	db.Gorm.Exec("DELETE FROM beers")
+}
+
+type mockLayerOk struct{}
+
+func (l *mockLayerOk) GetCurrency() (*currencylayer.Response, error) {
+	return &currencylayer.Response{
+		Source: "USD",
+		Quotes: map[string]float64{
+			"USDCLP": float64(828.503912),
+			"USDARS": float64(105.356594),
+			"USDEUR": float64(0.873404),
+			"USDUSD": float64(1),
+		},
+	}, nil
+}
+
+type mockLayerError struct{}
+
+func (l *mockLayerError) GetCurrency() (*currencylayer.Response, error) {
+	return nil, errors.New("error with layer")
 }
