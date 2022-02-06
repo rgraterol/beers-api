@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rgraterol/beers-api/pkg/router"
 )
 
 var serverConfig ServerConfiguration
@@ -33,7 +34,7 @@ func ServerInitializer() {
 	r.Use(middleware.Timeout(time.Duration(serverConfig.Timeout) * time.Second))
 	r.Use(ChiLogger())
 
-	routes(r)
+	router.Routes(r)
 
 	zap.S().Info("Application running on address ", serverConfig.Address, " and enviroment ", Env())
 	http.ListenAndServe(serverConfig.Address, r)
