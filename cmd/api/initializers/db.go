@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
-	"path"
 	"time"
 
 	"github.com/pkg/errors"
@@ -54,7 +53,7 @@ func DatabaseInitializer() {
 	pool.SetConnMaxLifetime(time.Duration(DatabaseConfig.ConnMaxLifetime))
 
 	if DatabaseConfig.AutoMigrate {
-		err = runMigrations()
+		err = runBeersMigration()
 		if err != nil {
 			panic(err)
 		}
@@ -67,22 +66,13 @@ func MockDatabaseInitializer() {
 	if err != nil {
 		panic(errors.Wrap(err, "failed to connect gorm with mock DB"))
 	}
-	err = runMigrations()
+	err = runBeersMigration()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func rootDir() string {
-	crrPath, _ := crrFSGetter.getwd()
-	dir, err := os.Open(path.Join(crrPath, "../../../"))
-	if err != nil {
-		panic(errors.New("cannot find project root directory"))
-	}
-	return dir.Name()
-}
-
-func runMigrations() error {
+func runBeersMigration() error {
 	if db.Gorm.Migrator().HasTable(&beers.Beer{}) {
 		return nil
 	}

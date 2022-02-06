@@ -2,10 +2,12 @@ package beers_test
 
 import (
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/pkg/errors"
 	"github.com/rgraterol/beers-api/cmd/api/initializers"
 	"github.com/rgraterol/beers-api/pkg/db"
 	"github.com/rgraterol/beers-api/pkg/usecases/beers"
@@ -13,7 +15,7 @@ import (
 )
 
 func init() {
-	initializers.MockDatabaseInitializer()
+	initTestDB()
 }
 
 func TestCreateOk(t *testing.T) {
@@ -136,6 +138,15 @@ func duplicatedbeerMock() beers.Beer {
 func mockBrokenDB() {
 	mockDB, _, _ := sqlmock.New()
 	db.Gorm, _ = gorm.Open(mysql.New(mysql.Config{Conn: mockDB, SkipInitializeWithVersion: true}), &gorm.Config{})
+}
+
+func initTestDB() {
+	var err error
+	db.Gorm, err = gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	if err != nil {
+		panic(errors.Wrap(err, "failed to connect gorm with mock DB"))
+	}
+	db.Gorm.AutoMigrate(&beers.Beer{})
 }
 
 func clearTestDB() {
