@@ -11,11 +11,7 @@ import (
 
 func List(s Interface) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		beers, err := s.List()
-		if err != nil {
-			responses.Error(w, err)
-			return
-		}
+		beers := s.List()
 		responses.OK(w, beers)
 	}
 }

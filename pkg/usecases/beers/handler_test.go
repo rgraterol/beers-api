@@ -13,18 +13,27 @@ import (
 )
 
 func TestList200(t *testing.T) {
+	//GIVEN
 	ts := httptest.NewServer(http.HandlerFunc(beers.List(&ServiceMockOk{})))
 	defer ts.Close()
-
+	//WHEN
 	res, _ := http.Get(ts.URL)
+	//THEN
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+}
 
-	if res.StatusCode != http.StatusOK {
-		t.Errorf("Got status %v, expected status 200", res.StatusCode)
-	}
+func TestListError200(t *testing.T) {
+	//GIVEN
+	ts := httptest.NewServer(http.HandlerFunc(beers.List(&ServiceMockError{})))
+	defer ts.Close()
+	//WHEN
+	res, _ := http.Get(ts.URL)
+	//THEN
+	assert.Equal(t, http.StatusOK, res.StatusCode)
 }
 
 func TestCreateEmptyBody400(t *testing.T) {
-	//Given
+	//GIVEN
 	ts := httptest.NewServer(http.HandlerFunc(beers.Create(&ServiceMockError{})))
 	defer ts.Close()
 	//WHEN
@@ -38,7 +47,7 @@ func TestCreateEmptyBody400(t *testing.T) {
 }
 
 func TestCreateEmptyName400(t *testing.T) {
-	//Given
+	//GIVEN
 	ts := httptest.NewServer(http.HandlerFunc(beers.Create(&ServiceMockError{})))
 	defer ts.Close()
 	values := map[string]string{}
@@ -55,7 +64,7 @@ func TestCreateEmptyName400(t *testing.T) {
 }
 
 func TestCreateDuplicated409(t *testing.T) {
-	//Given
+	//GIVEN
 	ts := httptest.NewServer(http.HandlerFunc(beers.Create(&ServiceMockDuplicatedError{})))
 	defer ts.Close()
 	//WHEN
@@ -82,7 +91,7 @@ func TestCreateError500(t *testing.T) {
 }
 
 func TestCreateOk201(t *testing.T) {
-	//Given
+	//GIVEN
 	ts := httptest.NewServer(http.HandlerFunc(beers.Create(&ServiceMockOk{})))
 	defer ts.Close()
 	//WHEN
@@ -108,8 +117,8 @@ func buildMockBody() []byte {
 
 type ServiceMockOk struct {}
 
-func (s *ServiceMockOk) List() ([]beers.Beer, error) {
-	return nil, nil
+func (s *ServiceMockOk) List() []beers.Beer {
+	return nil
 }
 
 func (s *ServiceMockOk) Create(b *beers.Beer) (*beers.Beer, error) {
@@ -118,8 +127,8 @@ func (s *ServiceMockOk) Create(b *beers.Beer) (*beers.Beer, error) {
 
 type ServiceMockError struct {}
 
-func (s *ServiceMockError) List() ([]beers.Beer, error) {
-	return nil, errors.New("cannot access DB")
+func (s *ServiceMockError) List() []beers.Beer {
+	return nil
 }
 
 func (s *ServiceMockError) Create(b *beers.Beer) (*beers.Beer, error) {
@@ -128,8 +137,8 @@ func (s *ServiceMockError) Create(b *beers.Beer) (*beers.Beer, error) {
 
 type ServiceMockDuplicatedError struct {}
 
-func (s *ServiceMockDuplicatedError) List() ([]beers.Beer, error) {
-	return nil, errors.New("cannot access DB")
+func (s *ServiceMockDuplicatedError) List() []beers.Beer {
+	return nil
 }
 
 func (s *ServiceMockDuplicatedError) Create(b *beers.Beer) (*beers.Beer, error) {

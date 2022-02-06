@@ -1,6 +1,6 @@
 package beers
 
 type Interface interface {
-	List() ([]Beer, error)
+	List() []Beer
 	Create(b *Beer) (*Beer, error)
 }

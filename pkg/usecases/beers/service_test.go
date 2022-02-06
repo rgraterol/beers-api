@@ -53,6 +53,27 @@ func TestCreate500(t *testing.T) {
 	assert.NotEqual(t, beers.DuplicatedError, err)
 }
 
+func TestListEmpty200(t *testing.T) {
+	// Given
+	var s beers.Service
+	// When
+	bs := s.List()
+	// Then
+	assert.Equal(t, 0, len(bs))
+}
+
+func TestListWithItems200(t *testing.T) {
+	// Given
+	var s beers.Service
+	b := beerMock()
+	beerCreate, err := s.Create(&b)
+	assert.Nil(t, err)
+	// When
+	bs := s.List()
+	// Then
+	assert.Equal(t, bs[0].ID, beerCreate.ID)
+}
+
 func beerMock() beers.Beer {
 	return beers.Beer{
 		ID:        1,

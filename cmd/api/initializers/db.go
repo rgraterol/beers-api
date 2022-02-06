@@ -63,14 +63,14 @@ func DatabaseInitializer() {
 
 func MockDatabaseInitializer() {
 	testDBPath := rootDir() + "/db/mock/test.db"
-	err := clearTestDB(testDBPath)
-	if err != nil {
-		panic(errors.Wrap(err, "cannot clear test DB"))
-	}
-
+	var err error
 	db.Gorm, err = gorm.Open(sqlite.Open(testDBPath), &gorm.Config{Logger: initGormLogger()})
 	if err != nil {
 		panic(errors.Wrap(err, "failed to connect gorm with mock DB"))
+	}
+	err = ClearTestDB(testDBPath)
+	if err != nil {
+		panic(errors.Wrap(err, "cannot clear test DB"))
 	}
 	err = runMigrations()
 	if err != nil {
@@ -87,9 +87,9 @@ func rootDir() string {
 	return dir.Name()
 }
 
-func clearTestDB(path string) error {
-	if _, err := os.Stat(path); err == nil {
-		return os.Remove(path)
+func ClearTestDB(path string) error {
+	if _, err := os.Stat(path); err == nil && db.Gorm.Migrator().HasTable(&beers.Beer{}) {
+		db.Gorm.Exec("DELETE FROM beers")
 	}
 	return nil
 }

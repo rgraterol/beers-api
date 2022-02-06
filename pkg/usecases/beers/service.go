@@ -1,7 +1,6 @@
 package beers
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 	"strings"
 
@@ -13,11 +12,10 @@ type Service struct {}
 
 var DuplicatedError = errors.New("the beer already exist in the DB")
 
-func (s *Service) List() ([]Beer, error) {
-	var beer Beer
-	db.Gorm.First(&beer, "name = ?", "Golden")
-	fmt.Println(beer)
-	return nil, nil
+func (s *Service) List() []Beer {
+	var beers []Beer
+	db.Gorm.Find(&beers)
+	return beers
 }
 
 func (s *Service) Create(b *Beer) (*Beer, error) {
