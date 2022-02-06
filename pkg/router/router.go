@@ -12,8 +12,10 @@ func Routes(r *chi.Mux) {
 	r.Get("/ping", basePingHandler)
 
 	r.Route("/beers", func(r chi.Router) {
-		r.Get("/", beers.List(&beers.Service{}))
-		r.Post("/", beers.Create(&beers.Service{}))
+		var b beers.Service
+		r.Get("/", beers.List(&b))
+		r.Post("/", beers.Create(&b))
+		r.Get("/{beerID}", beers.Get(&b))
 	})
 }
 

@@ -23,6 +23,10 @@ func BadRequest(w http.ResponseWriter, response string) {
 	Abort(w, http.StatusBadRequest, response)
 }
 
+func NotFound(w http.ResponseWriter, response string) {
+	Abort(w, http.StatusNotFound, response)
+}
+
 func Error(w http.ResponseWriter, err error) {
 	if e, ok := errors.Cause(err).(interface {
 		StatusCode() int
