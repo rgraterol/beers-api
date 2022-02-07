@@ -12,6 +12,6 @@ func run() {
 	i.ConfigInitializer()
 	i.LoggerInitializer()
 	i.DatabaseInitializer()
-	i.ServerInitializer()
 	i.RestClientsInitializer()
+	i.ServerInitializer()
 }
