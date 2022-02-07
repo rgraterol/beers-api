@@ -13,16 +13,24 @@ CRUD API for handling beers in a bar ecosystem.
 
 # To run the project
  - Initialize the DB
-`docker-compose up -d`
+```
+docker-compose up -d
+```
 
 - Download dependencies
-`go mod download`
+```bash
+go mod download
+```
 
 - Run Project
-`go run cmd/api/main.go`
+```bash
+go run cmd/api/main.go
+```
 
 - Test if server is up and running
-`curl --location --request GET 'http://localhost:8080/ping'` should return pong.
+```bash
+curl --location --request GET 'http://localhost:8080/ping'
+``` 
 
 ## Tests
 
