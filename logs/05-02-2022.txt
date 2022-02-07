@@ -1,4 +1,0 @@
-05-02-2022 15:27:09	[34mINFO[0m	server/server.go:62	Application running on address :8080 and enviroment development
-05-02-2022T15:27:24Z	[34mINFO[0m	server/server.go:62	Application running on address :8080 and enviroment development
-05-02-2022T15:28:28Z	[34mINFO[0m	server/server.go:60	Application running on address :8080 and enviroment development
-05-02-2022T15:29:32Z	[34mINFO[0m	server/server.go:58	Application running on address :8080 and enviroment development

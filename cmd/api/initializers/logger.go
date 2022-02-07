@@ -1,12 +1,13 @@
-package logger
+package initializers
 
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"net/http"
 	"os"
 	"time"
 
-	"github.com/rgraterol/beers-api/initializers/config"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // LoggerConfiguration represents configuration for logs.
@@ -15,7 +16,9 @@ type LoggerConfiguration struct {
 	Level string `yaml:"level"`
 }
 
-var LoggerConfig LoggerConfiguration
+var loggerConfig LoggerConfiguration
+
+var logg *zap.Logger
 
 var levelMap = map[string]zapcore.Level{
 	"debug":  zapcore.DebugLevel,
@@ -25,6 +28,13 @@ var levelMap = map[string]zapcore.Level{
 	"dpanic": zapcore.DPanicLevel,
 	"panic":  zapcore.PanicLevel,
 	"fatal":  zapcore.FatalLevel,
+}
+
+func createDirectoryIfDoesntExist() {
+	crrPath, _ := crrFSGetter.getwd()
+	if _, err := os.Stat(crrPath + "/logs"); os.IsNotExist(err) {
+		os.Mkdir("logs", os.ModePerm)
+	}
 }
 
 func getLogWriter() zapcore.WriteSyncer {
@@ -52,17 +62,30 @@ func getEncoder() zapcore.Encoder {
 }
 
 func getLevel() zapcore.Level {
-	err := config.LoadConfigSection("logger", &LoggerConfig)
+	err := LoadConfigSection("logger", &loggerConfig)
 	if err != nil {
 		panic(err)
 	}
-	if level, err := levelMap[LoggerConfig.Level]; err {
+	if level, err := levelMap[loggerConfig.Level]; err {
 		return level
 	}
 	return zapcore.DebugLevel
 }
 
+func ChiLogger() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+			next.ServeHTTP(ww, r)
+			logg.Info("Request:", zap.String("path", r.URL.Path), zap.Int("status", ww.Status()),
+				zap.Int("size", ww.BytesWritten()), zap.String("requestId", middleware.GetReqID(r.Context())))
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
 func LoggerInitializer() {
+	createDirectoryIfDoesntExist()
 	writerSync := getLogWriter()
 	encoder := getEncoder()
 
@@ -70,7 +93,7 @@ func LoggerInitializer() {
 		zapcore.NewCore(encoder, writerSync, getLevel()),
 		zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), getLevel()),
 	)
-	logg := zap.New(core, zap.AddCaller())
+	logg = zap.New(core, zap.AddCaller())
 
 	zap.ReplaceGlobals(logg)
 }

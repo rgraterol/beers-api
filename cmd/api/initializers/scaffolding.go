@@ -1,4 +1,4 @@
-package config
+package initializers
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	confDefaultDir = "initializers/config/resources"
+	confDefaultDir = "configs"
 	appDefaultPath = "/cmd/api"
 	ymlExtension = ".yml"
 	yamlExtension = ".yaml"

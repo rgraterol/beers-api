@@ -1,5 +1,0 @@
-server:
-  address: ":8080"
-
-logger:
-  level: "info"

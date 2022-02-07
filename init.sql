@@ -1,0 +1,2 @@
+CREATE DATABASE IF NOT EXISTS beers_api;
+USE beers_api;

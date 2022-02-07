@@ -1,12 +1,17 @@
 package main
 
 import (
-	"log"
-
-	"github.com/rgraterol/beers-api/initializers/server"
+	i "github.com/rgraterol/beers-api/cmd/api/initializers"
 )
 
-
 func main() {
-	log.Panic(server.RunServer())
+	run()
+}
+
+func run() {
+	i.ConfigInitializer()
+	i.LoggerInitializer()
+	i.DatabaseInitializer()
+	i.RestClientsInitializer()
+	i.ServerInitializer()
 }
